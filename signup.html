@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustain Drive - Login</title>
+    <link rel="shortcut icon" type="image/icon" href="assets/logo/favicon.png"/>
+    <style>
+        /* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #4CAF50, #e8f5e9); /* Green to light green gradient */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 16px;
+}
+
+.container {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    width: 380px;
+    padding: 40px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.container:hover {
+    transform: translateY(-10px); /* Lift the container slightly on hover */
+}
+
+/* Toggle Buttons */
+.toggle-buttons {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 15px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.toggle-btn.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.toggle-btn:hover {
+    background-color: #e0e0e0; /* Slight hover effect */
+}
+
+/* Form Containers */
+.form-container {
+    display: none;
+}
+
+.form-container.active {
+    display: block;
+}
+
+/* Input Fields */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5); /* Green glow effect on focus */
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+/* For mobile responsiveness */
+@media (max-width: 480px) {
+    .container {
+        width: 90%;
+        padding: 20px;
+    }
+    
+    .toggle-btn {
+        font-size: 14px;
+    }
+    
+    .submit-btn {
+        font-size: 16px;
+    }
+}
+
+    </style>
+</head>
+<body style="background: linear-gradient(to right, #4CAF50, #ffffff);">
+    <div class="container">
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" onclick="showLogin()">Login</button>
+            <button class="toggle-btn" onclick="showSignup()">Sign Up</button>
+        </div>
+
+        <div id="login-form" class="form-container active">
+            <form onsubmit="return handleLogin(event)">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+        </div>
+
+        <div id="signup-form" class="form-container">
+            <form onsubmit="return handleSignup(event)">
+                <input type="text" id="signupName" placeholder="Full Name" required>
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const cloudantUrl = "https://27c5d0de-f860-4c60-b019-b48f6852f347-bluemix.cloudantnosqldb.appdomain.cloud";
+        const apiKey = "bp0KpYFbRS8dMhS1AHY-szoKnarhxRAJQkALNkDnY7Kv";
+        const databaseName = "registration";
+
+        // Toggle between login and signup
+        function showLogin() {
+            document.getElementById('login-form').classList.add('active');
+            document.getElementById('signup-form').classList.remove('active');
+            document.querySelector('.toggle-buttons').children[0].classList.add('active');
+            document.querySelector('.toggle-buttons').children[1].classList.remove('active');
+        }
+
+        function showSignup() {
+            document.getElementById('signup-form').classList.add('active');
+            document.getElementById('login-form').classList.remove('active');
+            document.querySelector('.toggle-buttons').children[1].classList.add('active');
+            document.querySelector('.toggle-buttons').children[0].classList.remove('active');
+        }
+
+        // Login handler
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/login', {  // Updated to match backend port 3000
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    //alert('Login successful!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Invalid login credentials. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred. Please try again later.');
+            }
+        }
+
+        // Signup handler
+        async function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${cloudantUrl}/${databaseName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${btoa("apikey-v2-27k5iiskxgapgk06s2c67tszhnb6wmlzjlttixfzr48u:a77beea7baf9f261674a84ddac96bb53")}`
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password
+                    })
+                });
+
+                if (response.ok) {
+                    //alert('Signup successful! Please login.');
+                    showLogin();
+                } else {
+                    alert('An error occurred during signup. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                alert('An error occurred. Please try again later.');
+            }
+        }
+    </script>
+</body>
+</html>
