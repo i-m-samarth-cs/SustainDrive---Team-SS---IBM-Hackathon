@@ -81,7 +81,7 @@ Together, we can make a difference—one vehicle at a time.
 ## **Project Demo**
 
 Watch the full demo of Sustain Drive on YouTube:  
-[**Sustain Drive Demo Video**](#) _(Replace with the actual YouTube link.)_
+[[**Sustain Drive Demo Video**]](https://youtu.be/qooB0uTH640)(#) _(Replace with the actual YouTube link.)_
 
 ## **Contributors**
 
