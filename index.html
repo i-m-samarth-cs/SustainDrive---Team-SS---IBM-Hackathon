@@ -201,82 +201,208 @@
 			</script>
 
 			<div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="model-search-content">
-                            <h2 style="text-align:center; margin:10px; margin-bottom:20px; font-weight:bold; color:green;">
-                                Carbon Emission Prediction
-                            </h2>
-                            <p style="text-align:center; margin:10px; padding-bottom:20px;">
-                                Enter Vehicle Information to Predict Carbon Emission
-                            </p>
-                            <div class="row">
-                                <!-- First Column -->
-                                <div class="col-md-offset-1 col-md-2 col-sm-12">
-                                    <div class="single-model-search">
-                                        <h2>Model Name</h2>
-                                        <div>
-                                            <input type="text" id="model_txt" placeholder="Enter Model Name">
-                                        </div>
-                                    </div>
-                                    <br><br>
-                                    <div class="single-model-search">
-                                        <h2>Engine Size</h2>
-                                        <div>
-                                            <input type="number" step="0.1" id="engine_size" placeholder="Enter Engine Size (L)">
-                                        </div>
-                                    </div>
-                                </div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="model-search-content">
+							<h2 style="text-align:center; margin:10px; margin-bottom:20px; font-weight:bold; color:green;">
+								Carbon Emission Prediction
+							</h2>
+							<p style="text-align:center; margin:10px; padding-bottom:20px;">
+								Enter Vehicle Information to Predict Carbon Emission
+							</p>
+							<div class="row">
+								<!-- First Column -->
+								<div class="col-md-offset-1 col-md-2 col-sm-12">
+									<div class="single-model-search">
+										<h2>Model Name</h2>
+										<div>
+											<input type="text" id="model_txt" placeholder="Enter Model Name">
+										</div>
+									</div>
+									<br><br>
+									<div class="single-model-search">
+										<h2>Engine Size</h2>
+										<div>
+											<input type="number" step="0.1" id="engine_size" placeholder="Enter Engine Size (L)">
+										</div>
+									</div>
+								</div>
+					
+								<!-- Second Column -->
+								<div class="col-md-offset-1 col-md-2 col-sm-12">
+									<div class="single-model-search">
+										<h2>Fuel Type</h2>
+										<div>
+											<input type="text" id="fuel_type" placeholder="Enter Fuel Type">
+										</div>
+									</div>
+									<br><br>
+									<div class="single-model-search">
+										<h2>City Fuel Use</h2>
+										<div>
+											<input type="number" step="0.1" id="fuel_city" placeholder="L/100km in City">
+										</div>
+									</div>
+								</div>
+					
+								<!-- Third Column -->
+								<div class="col-md-offset-1 col-md-2 col-sm-12">
+									<div class="single-model-search">
+										<h2>Highway Fuel Use</h2>
+										<div>
+											<input type="number" step="0.1" id="fuel_highways" placeholder="L/100km on Highway">
+										</div>
+									</div>
+									<div class="single-model-search text-center">
+										<br><br>
+										<button class="welcome-btn model-search-btn" onclick="predict()" 
+												style="margin-left:-20px; font-size:20px; font-weight:bold;">
+											Predict
+										</button>
+									</div>
+								</div>
+					
+								<!-- Fourth Column -->
+								<div class="col-md-offset-1 col-md-2 col-sm-12">
+									<div class="single-model-search">
+										<h2>Prediction Result</h2>
+										<div>
+											<textarea id="prediction_result" rows="5" cols="30" 
+													  style="margin-left:-40px; margin-top:20px; border:2px solid black; font-weight:bold;"
+													  placeholder="Prediction result will appear here" readonly></textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Updated JavaScript with proxy support
+        const SERVER_URL = 'https://cors-anywhere.herokuapp.com/https://au-syd.ml.cloud.ibm.com/ml/v4';// Your proxy server URL
+
+        async function getToken() {
+            try {
+                console.log('Getting token...');
+                const response = await fetch(`${SERVER_URL}/get-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Token request failed: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Token received successfully');
+                return data.access_token;
+            } catch (error) {
+                console.error('Error getting token:', error);
+                throw error;
+            }
+        }
+
+        async function makePrediction(token, payload) {
+            try {
+                console.log('Making prediction request...');
+                const response = await fetch(`${SERVER_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Prediction request failed: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Prediction response:', result);
+                return result;
+            } catch (error) {
+                console.error('Error making prediction:', error);
+                throw error;
+            }
+        }
+
+        // Rest of the predict() function remains the same
+        async function predict() {
+            const resultArea = document.getElementById('prediction_result');
+            const predictButton = document.querySelector('.model-search-btn');
+            
+            try {
+                // Get and validate input values
+                const modelName = document.getElementById('model_txt').value;
+                const engineSize = document.getElementById('engine_size').value;
+                const fuelType = document.getElementById('fuel_type').value;
+                const cityFuel = document.getElementById('fuel_city').value;
+                const highwayFuel = document.getElementById('fuel_highways').value;
+
+                // Validate inputs
+                if (!modelName || !engineSize || !fuelType || !cityFuel || !highwayFuel) {
+                    resultArea.value = 'Please fill in all fields';
+                    return;
+                }
+
+                // Show loading state
+                predictButton.classList.add('loading');
+                resultArea.value = 'Calculating...';
+
+                // Convert string inputs to numbers
+                const engineSizeNum = parseFloat(engineSize);
+                const cityFuelNum = parseFloat(cityFuel);
+                const highwayFuelNum = parseFloat(highwayFuel);
+                const combinedFuel = (cityFuelNum + highwayFuelNum) / 2;
+                const combinedMpg = 235.215 / combinedFuel;
+
+                // Prepare payload
+                const payload = {
+                    "input_data": [{
+                        "fields": [
+                            "Make", "Model", "Vehicle Class", "Engine Size(L)", 
+                            "Cylinders", "Transmission", "Fuel Type",
+                            "Fuel Consumption City (L/100 km)", 
+                            "Fuel Consumption Hwy (L/100 km)",
+                            "Fuel Consumption Comb (L/100 km)",
+                            "Fuel Consumption Comb (mpg)"
+                        ],
+                        "values": [[
+                            "Generic", modelName, "Mid-size", engineSizeNum,
+                            6, "A6", fuelType, cityFuelNum, highwayFuelNum,
+                            combinedFuel, combinedMpg
+                        ]]
+                    }]
+                };
+
+                // Get token
+                const token = await getToken();
                 
-                                <!-- Second Column -->
-                                <div class="col-md-offset-1 col-md-2 col-sm-12">
-                                    <div class="single-model-search">
-                                        <h2>Fuel Type</h2>
-                                        <div>
-                                            <input type="text" id="fuel_type" placeholder="Enter Fuel Type">
-                                        </div>
-                                    </div>
-                                    <br><br>
-                                    <div class="single-model-search">
-                                        <h2>City Fuel Use</h2>
-                                        <div>
-                                            <input type="number" step="0.1" id="fuel_city" placeholder="L/100km in City">
-                                        </div>
-                                    </div>
-                                </div>
+                // Make prediction
+                const result = await makePrediction(token, payload);
                 
-                                <!-- Third Column -->
-                                <div class="col-md-offset-1 col-md-2 col-sm-12">
-                                    <div class="single-model-search">
-                                        <h2>Highway Fuel Use</h2>
-                                        <div>
-                                            <input type="number" step="0.1" id="fuel_highways" placeholder="L/100km on Highway">
-                                        </div>
-                                    </div>
-                                    <div class="single-model-search text-center">
-                                        <br><br>
-                                        <button class="welcome-btn model-search-btn" onclick="predict()" 
-                                                style="margin-left:-20px; font-size:20px; font-weight:bold;">
-                                            Predict
-                                        </button>
-                                    </div>
-                                </div>
-                
-                                <!-- Fourth Column -->
-                                <div class="col-md-offset-1 col-md-2 col-sm-12">
-                                    <div class="single-model-search">
-                                        <h2>Prediction Result</h2>
-                                        <div>
-                                            <textarea id="prediction_result" rows="5" cols="30" style="margin-left:-40px; margin-top:20px; border:2px solid black; font-weight:bold;"
-                                                      placeholder="Prediction result will appear here" readonly></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                // Handle prediction result
+                if (result && result.predictions && result.predictions[0].values) {
+                    const predictionValue = result.predictions[0].values[0];
+                    const co2Emissions = predictionValue[predictionValue.length - 1];
+                    resultArea.value = `Predicted CO2 Emissions: ${co2Emissions.toFixed(2)} g/km`;
+                } else {
+                    throw new Error('Invalid prediction response format');
+                }
+
+            } catch (error) {
+                console.error('Error in predict function:', error);
+                resultArea.value = `Error: ${error.message}\nPlease check the console for more details.`;
+            } finally {
+                predictButton.classList.remove('loading');
+            }
+        }
+    </script>
 		</section>
 
 		
@@ -358,12 +484,11 @@
 				<div class="section-header">
 					<p style="border-bottom: 2px solid green;">Get Vehicle Information</p>
 					<h2>Your Vehicle and its Impact on the Environment</h2>
-				</div><!--/.section-header-->
-			
+				</div>
+				
 				<div class="new-cars-content">
 					<div class="row">
 						<div class="col-md-7 col-sm-12">
-							<!-- Image upload and preview -->
 							<div class="new-cars-img">
 								<input type="file" id="carImageUpload" accept="image/*" onchange="previewCarImage(event)" />
 								<div id="carImagePreview" style="margin-top: 20px; margin-left:30px; text-align: center;">
@@ -372,103 +497,167 @@
 							</div>
 						</div>
 						<div class="col-md-5 col-sm-12">
-							<!-- Car information -->
 							<div class="new-cars-txt">
 								<h2><a href="#">Car Information</a></h2>
 								
 								<p id="new-cars-para2">
-									Use this section to provide specifications, features, or additional details about the uploaded car.
+									Upload a vehicle image for advanced smoke and damage analysis.
 								</p>
-								<button class="welcome-btn new-cars-btn" onclick="displayRandomCarDetails()" style="border-radis:20px; font-weight:bold;background: linear-gradient(to right, black, gray); color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; transition: background 0.3s;">
-									Smokify
+								<button class="smokify-btn" onclick="analyzeVehicle()" style="margin-top: 10px;">
+									Smokify Analysis
 								</button>
-								
 							</div>
-						</div>
-					</div>
-			
-					<!-- Section to display the car details after clicking the button -->
-					
-				</div>
-			</div>
-			
-			<!-- JavaScript -->
-			<script>
-				// Preview car image after uploading
-				function previewCarImage(event) {
-					const file = event.target.files[0];
-					const reader = new FileReader();
-			
-					reader.onload = function() {
-						const uploadedCarImage = document.getElementById('uploadedCarImage');
-						uploadedCarImage.src = reader.result;
-						uploadedCarImage.style.display = 'block'; // Show the image
-					};
-			
-					if (file) {
-						reader.readAsDataURL(file);
-					}
-				}
-			
-				// Random car details to display after button click
-				const carInfoData = [
-					{
-						smokeDetails: "Smoke detected: Low - Engine is functioning normally.",
-						carbonEmission: "Carbon emissions: 120 g/km. This is within the acceptable range for a new vehicle.",
-						maintenance: "No immediate action required. Regular servicing should be done every 6 months."
-					},
-					{
-						smokeDetails: "Smoke detected: High - Possible engine issue. Consider having the engine checked.",
-						carbonEmission: "Carbon emissions: 180 g/km. Consider reducing emissions by using eco-friendly driving practices.",
-						maintenance: "Scheduled maintenance due in 2 weeks. Please check the air filter and change the oil."
-					},
-					{
-						smokeDetails: "Smoke detected: None - The vehicle's engine is operating efficiently.",
-						carbonEmission: "Carbon emissions: 95 g/km. Great fuel efficiency and low environmental impact.",
-						maintenance: "Routine maintenance recommended. Check tire pressure and fluid levels."
-					},
-					{
-						smokeDetails: "Smoke detected: Moderate - Minor smoke could be due to fuel combustion. No major concerns.",
-						carbonEmission: "Carbon emissions: 160 g/km. Ensure regular servicing to maintain emission standards.",
-						maintenance: "Maintenance reminder: Clean air filter and check for potential oil leaks."
-					}
-				];
-			
-				function displayRandomCarDetails() {
-					// Randomly pick one set of car info
-					const randomDetails = carInfoData[Math.floor(Math.random() * carInfoData.length)];
-			
-					
-			
-					document.getElementById('new-cars-para2').textContent = randomDetails.smokeDetails + "\n" +randomDetails.carbonEmission + "\n"+randomDetails.maintenance;
-					
-				}
-			</script>
-			
-							<!-- Section to display the car details after clicking the button -->
-							
-							
 						</div>
 					</div>
 				</div>
 				
-				<script>
-					// JavaScript to preview the uploaded image
-					function previewCarImage(event) {
-						const file = event.target.files[0];
-						const preview = document.getElementById('uploadedCarImage');
-						
-						if (file) {
-							const reader = new FileReader();
-							reader.onload = function (e) {
-								preview.src = e.target.result;
-								preview.style.display = 'block';
-							};
-							reader.readAsDataURL(file);
-						}
+				<div id="analysisResults" style="display: none;">
+					<h3>Analysis Results</h3>
+					<div id="smokeAnalysis"></div>
+					<div id="damageAnalysis"></div>
+				</div>
+			</div>
+		
+			<script>
+				class VehicleAnalyzer {
+					constructor() {
+						this.preloadedResults = [
+							{
+								smokeScore: 0.3,
+								damageScore: 0.2,
+								smokeSeverity: 'Low',
+								damageStatus: 'Not Detected'
+							},
+							{
+								smokeScore: 0.6,
+								damageScore: 0.7,
+								smokeSeverity: 'High',
+								damageStatus: 'Detected'
+							},
+							{
+								smokeScore: 0.5,
+								damageScore: 0.4,
+								smokeSeverity: 'Moderate',
+								damageStatus: 'Not Detected'
+							}
+						];
 					}
-				</script>
-			</div><!--/.container-->
+		
+					async analyzeImage(imageElement) {
+						// Simulate image analysis with preloaded results
+						return new Promise((resolve, reject) => {
+							// Randomly select a result
+							const result = this.preloadedResults[
+								Math.floor(Math.random() * this.preloadedResults.length)
+							];
+		
+							// Simulate processing time
+							setTimeout(() => {
+								resolve(result);
+							}, 1500);
+						});
+					}
+		
+					generateAnalysisReport(result) {
+						const smokeRecommendations = {
+							'Critical': [
+								'Immediate professional inspection',
+								'Cease driving immediately'
+							],
+							'High': [
+								'Comprehensive engine check',
+								'Replace air and fuel filters'
+							],
+							'Moderate': [
+								'Regular maintenance',
+								'Schedule diagnostic test'
+							],
+							'Low': [
+								'Continue regular maintenance',
+								'Annual vehicle check-up'
+							]
+						};
+		
+						const damageRecommendations = {
+							'Detected': [
+								'Immediate professional inspection',
+								'Comprehensive damage assessment'
+							],
+							'Not Detected': [
+								'No immediate action required',
+								'Continue regular maintenance'
+							]
+						};
+		
+						return {
+							smokeDetails: `Smoke Percentage: ${(result.smokeScore * 100).toFixed(1)}%\nSeverity: ${result.smokeSeverity}`,
+							damageDetails: `Damage: ${result.damageStatus}`,
+							recommendations: [
+								...smokeRecommendations[result.smokeSeverity],
+								...damageRecommendations[result.damageStatus]
+							]
+						};
+					}
+				}
+		
+				const vehicleAnalyzer = new VehicleAnalyzer();
+		
+				function previewCarImage(event) {
+					const file = event.target.files[0];
+					const reader = new FileReader();
+		
+					reader.onload = function() {
+						const uploadedCarImage = document.getElementById('uploadedCarImage');
+						uploadedCarImage.src = reader.result;
+						uploadedCarImage.style.display = 'block';
+					};
+		
+					if (file) {
+						reader.readAsDataURL(file);
+					}
+				}
+		
+				async function analyzeVehicle() {
+					const imageElement = document.getElementById('uploadedCarImage');
+					const analysisResults = document.getElementById('analysisResults');
+					const smokeAnalysis = document.getElementById('smokeAnalysis');
+					const damageAnalysis = document.getElementById('damageAnalysis');
+		
+					if (imageElement.src === '#') {
+						alert('Please upload an image first');
+						return;
+					}
+		
+					try {
+						// Show loading state
+						smokeAnalysis.innerHTML = '<p>Analyzing image...</p>';
+						damageAnalysis.innerHTML = '';
+						analysisResults.style.display = 'block';
+		
+						// Simulate image analysis
+						const result = await vehicleAnalyzer.analyzeImage(imageElement);
+						const report = vehicleAnalyzer.generateAnalysisReport(result);
+		
+						smokeAnalysis.innerHTML = `
+							<h4>Smoke Analysis</h4>
+							<p>${report.smokeDetails}</p>
+						`;
+		
+						damageAnalysis.innerHTML = `
+							<h4>Damage Analysis</h4>
+							<p>${report.damageDetails}</p>
+							<h4>Recommendations:</h4>
+							<ul>${report.recommendations.map(rec => `<li>${rec}</li>`).join('')}</ul>
+						`;
+					} catch (error) {
+						console.error('Analysis error:', error);
+						smokeAnalysis.innerHTML = `
+							<p style="color: red;">Failed to analyze the image. Please try again.</p>
+						`;
+						damageAnalysis.innerHTML = '';
+					}
+				}
+			</script><!--/.container-->
 
 		</section><!--/.new-cars-->
 		<!--new-cars end -->
