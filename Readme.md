@@ -1,9 +1,7 @@
-﻿
 # **Sustain Drive: Driving Towards a Sustainable Future**
-
 ## **Overview**
 
-**Sustain Drive** is an innovative application designed to address the global challenge of carbon emissions from vehicles. It combines predictive maintenance, eco-impact analysis, and a sustainability-focused chatbot to help users minimize their carbon footprint. By leveraging cutting-edge IBM technologies, Sustain Drive ensures vehicle efficiency, promotes sustainability, and empowers users to make eco-friendly decisions.
+**Sustain Drive** is an innovative  application designed to address the global challenge of carbon emissions from vehicles. It combines predictive maintenance, eco-impact analysis, and a sustainability-focused chatbot to help users minimize their carbon footprint. By leveraging cutting-edge IBM technologies, Sustain Drive ensures vehicle efficiency, promotes sustainability, and empowers users to make eco-friendly decisions.
 
 ## **Features**
 
@@ -81,7 +79,7 @@ Together, we can make a difference—one vehicle at a time.
 ## **Project Demo**
 
 Watch the full demo of Sustain Drive on YouTube:  
-[**Sustain Drive Demo Video**](#) _(Replace with the actual YouTube link.)_
+[[**Sustain Drive Demo Video**]](https://youtu.be/qooB0uTH640)(#)
 
 ## **Contributors**
 
